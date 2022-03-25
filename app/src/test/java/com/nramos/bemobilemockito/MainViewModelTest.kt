@@ -22,14 +22,14 @@ import org.mockito.junit.MockitoJUnitRunner
 @RunWith(MockitoJUnitRunner::class)
 class MainViewModelTest {
 
+    @Mock
+    lateinit var mockDataRepo: DataRepo
+
     lateinit var viewModel: MainViewModel
 
     lateinit var getDataUseCase: GetDataUseCase
 
     lateinit var mockCharacters: List<Character>
-
-    @Mock
-    lateinit var mockDataRepo: DataRepo
 
     @ExperimentalCoroutinesApi
     val dispatcher = UnconfinedTestDispatcher()
@@ -40,11 +40,11 @@ class MainViewModelTest {
         Dispatchers.setMain(dispatcher)
         mockCharacters = Gson().fromJson(charactersJson, Array<Character>::class.java).toList()
         getDataUseCase = GetDataUseCase(mockDataRepo)
-        viewModel = MainViewModel(getDataUseCase)
+        viewModel = MainViewModel(getDataUseCase = getDataUseCase)
     }
 
     @Test
-    fun `init viewModel test`()  {
+    fun `init viewModel test`() {
         runBlocking {
             assert(viewModel.state.value.loading)
             assert(viewModel.state.value.error.not())
@@ -53,12 +53,10 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `get data test and success`()  {
+    fun `get data and success`()  {
         runBlocking {
             Mockito.`when`(mockDataRepo.getData()).thenReturn(eitherSuccess(mockCharacters))
-
             viewModel.getData()
-
             assert(viewModel.state.value.loading.not())
             assert(viewModel.state.value.error.not())
             assert(viewModel.state.value.characters.isNotEmpty())
@@ -66,12 +64,10 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `get data test and fail`()  {
+    fun `get data and fail`()  {
         runBlocking {
             Mockito.`when`(mockDataRepo.getData()).thenReturn(eitherFailure("Error"))
-
             viewModel.getData()
-
             assert(viewModel.state.value.loading.not())
             assert(viewModel.state.value.error)
             assert(viewModel.state.value.characters.isEmpty())

@@ -5,6 +5,7 @@ import com.nramos.bemobilemockito.domain.Either
 import com.nramos.bemobilemockito.domain.eitherFailure
 import com.nramos.bemobilemockito.domain.eitherSuccess
 import com.nramos.bemobilemockito.domain.model.Character
+import com.nramos.bemobilemockito.domain.onFailure
 import com.nramos.bemobilemockito.domain.onSuccess
 import com.nramos.bemobilemockito.domain.repo.DataRepo
 import com.nramos.bemobilemockito.domain.usecases.GetDataUseCase
@@ -19,13 +20,10 @@ import org.mockito.junit.MockitoJUnitRunner
 @RunWith(MockitoJUnitRunner::class)
 class GetDataUseCaseTest {
 
-    lateinit var useCaseToTest: GetDataUseCase
-
     @Mock
     lateinit var mockDataRepo: DataRepo
 
-    @Mock
-    lateinit var fakeCharacters: List<Character>
+    lateinit var useCaseToTest: GetDataUseCase
 
     lateinit var mockCharacters: List<Character>
 
@@ -49,10 +47,35 @@ class GetDataUseCaseTest {
     }
 
     @Test
+    fun `get data but empty`()  {
+        runBlocking {
+            Mockito.`when`(mockDataRepo.getData()).thenReturn(eitherSuccess(emptyList()))
+            assert(useCaseToTest() is Either.Failure)
+            useCaseToTest().onFailure {
+                assert(it == "Empty error")
+            }
+        }
+    }
+
+    @Test
     fun `get data and fail`()  {
         runBlocking {
-            Mockito.`when`(mockDataRepo.getData()).thenReturn(eitherFailure("Error"))
+            Mockito.`when`(mockDataRepo.getData()).thenReturn(eitherFailure(""))
             assert(useCaseToTest() is Either.Failure)
+            useCaseToTest().onFailure {
+                assert(it == "Error")
+            }
+        }
+    }
+
+    @Test
+    fun `get data and undefined failure`()  {
+        runBlocking {
+            Mockito.`when`(mockDataRepo.getData()).thenReturn(null)
+            assert(useCaseToTest() is Either.Failure)
+            useCaseToTest().onFailure {
+                assert(it == "Undefined Error")
+            }
         }
     }
 
