@@ -3,8 +3,13 @@ package com.nramos.bemobilemockito.presentation
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.nramos.bemobilemockito.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -18,6 +23,15 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         viewModel.getData()
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.state.collectLatest {
+                    //Do whatever
+                    it
+                }
+            }
+        }
     }
 
 
