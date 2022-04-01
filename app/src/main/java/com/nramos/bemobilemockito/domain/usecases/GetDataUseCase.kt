@@ -9,7 +9,7 @@ import com.nramos.bemobilemockito.domain.onSuccess
 import com.nramos.bemobilemockito.domain.repo.DataRepo
 import javax.inject.Inject
 
-open class GetDataUseCase @Inject constructor(
+class GetDataUseCase @Inject constructor(
     private val repo: DataRepo
 ) {
 

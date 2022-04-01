@@ -23,11 +23,9 @@ import org.mockito.junit.MockitoJUnitRunner
 class MainViewModelTest {
 
     @Mock
-    lateinit var mockDataRepo: DataRepo
+    lateinit var getDataUseCase: GetDataUseCase
 
     lateinit var viewModel: MainViewModel
-
-    lateinit var getDataUseCase: GetDataUseCase
 
     lateinit var mockCharacters: List<Character>
 
@@ -39,7 +37,6 @@ class MainViewModelTest {
     fun setup() {
         Dispatchers.setMain(dispatcher)
         mockCharacters = Gson().fromJson(charactersJson, Array<Character>::class.java).toList()
-        getDataUseCase = GetDataUseCase(mockDataRepo)
         viewModel = MainViewModel(getDataUseCase = getDataUseCase)
     }
 
@@ -55,7 +52,7 @@ class MainViewModelTest {
     @Test
     fun `get data and success`()  {
         runBlocking {
-            Mockito.`when`(mockDataRepo.getData()).thenReturn(eitherSuccess(mockCharacters))
+            Mockito.`when`(getDataUseCase()).thenReturn(eitherSuccess(mockCharacters))
             viewModel.getData()
             assert(viewModel.state.value.loading.not())
             assert(viewModel.state.value.error.not())
@@ -66,7 +63,7 @@ class MainViewModelTest {
     @Test
     fun `get data and fail`()  {
         runBlocking {
-            Mockito.`when`(mockDataRepo.getData()).thenReturn(eitherFailure("Error"))
+            Mockito.`when`(getDataUseCase()).thenReturn(eitherFailure("Error"))
             viewModel.getData()
             assert(viewModel.state.value.loading.not())
             assert(viewModel.state.value.error)
